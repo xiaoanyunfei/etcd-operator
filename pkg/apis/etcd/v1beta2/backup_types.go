@@ -43,7 +43,7 @@ const (
 
 type BackupStorageType string
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // EtcdBackupList is a list of EtcdBackup.
 type EtcdBackupList struct {
@@ -54,12 +54,14 @@ type EtcdBackupList struct {
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // EtcdBackup represents a Kubernetes EtcdBackup Custom Resource.
 type EtcdBackup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              BackupSpec   `json:"spec"`
+	Spec              BackupSpec   `json:"spec,omitempty"`
 	Status            BackupStatus `json:"status,omitempty"`
 }
 
@@ -210,4 +212,8 @@ type OSSBackupSource struct {
 	// Details about regions and endpoints, see:
 	//  https://www.alibabacloud.com/help/doc-detail/31837.htm
 	Endpoint string `json:"endpoint,omitempty"`
+}
+
+func init() {
+	SchemeBuilder.Register(&EtcdBackup{}, &EtcdBackupList{})
 }

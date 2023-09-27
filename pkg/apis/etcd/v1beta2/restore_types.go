@@ -16,7 +16,7 @@ package v1beta2
 
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // EtcdRestoreList is a list of EtcdRestore.
 type EtcdRestoreList struct {
@@ -27,13 +27,15 @@ type EtcdRestoreList struct {
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
 // EtcdRestore represents a Kubernetes EtcdRestore Custom Resource.
 // The EtcdRestore CR name will be used as the name of the new restored cluster.
 type EtcdRestore struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              RestoreSpec   `json:"spec"`
+	Spec              RestoreSpec   `json:"spec,omitempty"`
 	Status            RestoreStatus `json:"status,omitempty"`
 }
 
@@ -163,4 +165,8 @@ type RestoreStatus struct {
 	Succeeded bool `json:"succeeded"`
 	// Reason indicates the reason for any backup related failures.
 	Reason string `json:"reason,omitempty"`
+}
+
+func init() {
+	SchemeBuilder.Register(&EtcdRestore{}, &EtcdRestoreList{})
 }

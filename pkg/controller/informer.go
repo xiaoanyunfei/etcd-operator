@@ -36,7 +36,7 @@ func init() {
 	pt = newPanicTimer(time.Minute, "unexpected long blocking (> 1 Minute) when handling cluster event")
 }
 
-func (c *Controller) Start() error {
+func (c *Controller) Start(ctx context.Context) error {
 	// TODO: get rid of this init code. CRD and storage class will be managed outside of operator.
 	for {
 		err := c.initResource()
@@ -49,11 +49,11 @@ func (c *Controller) Start() error {
 	}
 
 	probe.SetReady()
-	c.run()
+	c.run(ctx)
 	panic("unreachable")
 }
 
-func (c *Controller) run() {
+func (c *Controller) run(ctx context.Context) {
 	var ns string
 	if c.Config.ClusterWide {
 		ns = metav1.NamespaceAll
@@ -73,7 +73,6 @@ func (c *Controller) run() {
 		DeleteFunc: c.onDeleteEtcdClus,
 	}, cache.Indexers{})
 
-	ctx := context.TODO()
 	// TODO: use workqueue to avoid blocking
 	informer.Run(ctx.Done())
 }

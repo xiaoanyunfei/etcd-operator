@@ -7,5 +7,6 @@ metadata:
   # annotations:
   #   etcd.database.coreos.com/scope: clusterwide
 spec:
-  size: 3
-  version: "3.2.13"
+  size: 1
+  version: "3.5.9"
+  repository: "docker-reg.devops.xiaohongshu.com/shequ/etcd"

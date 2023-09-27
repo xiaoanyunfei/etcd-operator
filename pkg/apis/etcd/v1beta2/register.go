@@ -15,9 +15,8 @@
 package v1beta2
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 const (
@@ -33,10 +32,15 @@ const (
 )
 
 var (
-	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-	AddToScheme   = SchemeBuilder.AddToScheme
-
+	// GroupVersion is group version used to register these objects
 	SchemeGroupVersion = schema.GroupVersion{Group: groupName, Version: "v1beta2"}
+
+	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
+	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
+
+	// AddToScheme adds the types in this group-version to the given scheme.
+	AddToScheme = SchemeBuilder.AddToScheme
+
 	EtcdClusterCRDName = EtcdClusterResourcePlural + "." + groupName
 	EtcdBackupCRDName  = EtcdBackupResourcePlural + "." + groupName
 	EtcdRestoreCRDName = EtcdRestoreResourcePlural + "." + groupName
@@ -45,18 +49,4 @@ var (
 // Resource gets an EtcdCluster GroupResource for a specified resource
 func Resource(resource string) schema.GroupResource {
 	return SchemeGroupVersion.WithResource(resource).GroupResource()
-}
-
-// addKnownTypes adds the set of types defined in this package to the supplied scheme.
-func addKnownTypes(s *runtime.Scheme) error {
-	s.AddKnownTypes(SchemeGroupVersion,
-		&EtcdCluster{},
-		&EtcdClusterList{},
-		&EtcdBackup{},
-		&EtcdBackupList{},
-		&EtcdRestore{},
-		&EtcdRestoreList{},
-	)
-	metav1.AddToGroupVersion(s, SchemeGroupVersion)
-	return nil
 }

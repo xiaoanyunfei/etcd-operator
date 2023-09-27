@@ -48,7 +48,7 @@ const (
 )
 
 func init() {
-	flag.BoolVar(&createCRD, "create-crd", true, "The restore operator will not create the EtcdRestore CRD when this flag is set to false.")
+	flag.BoolVar(&createCRD, "create-crd", false, "The restore operator will not create the EtcdRestore CRD when this flag is set to false.")
 	flag.Parse()
 }
 
@@ -72,6 +72,7 @@ func main() {
 	logrus.Infof("Git SHA: %s", version.GitSHA)
 
 	kubecli := k8sutil.MustNewKubeClient()
+	leadercli := k8sutil.NewLeaderClient()
 
 	err = createServiceForMyself(kubecli, name, namespace)
 	if err != nil {
@@ -79,10 +80,11 @@ func main() {
 	}
 
 	rl, err := resourcelock.New(
-		resourcelock.EndpointsResourceLock,
+		resourcelock.LeasesResourceLock,
 		namespace,
 		"etcd-restore-operator",
-		kubecli.Core(),
+		kubecli.CoreV1(),
+		leadercli.CoordinationV1(),
 		resourcelock.ResourceLockConfig{
 			Identity:      id,
 			EventRecorder: createRecorder(kubecli, name, namespace),
@@ -112,7 +114,7 @@ func main() {
 func createRecorder(kubecli kubernetes.Interface, name, namespace string) record.EventRecorder {
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(logrus.Infof)
-	eventBroadcaster.StartRecordingToSink(&v1core.EventSinkImpl{Interface: v1core.New(kubecli.Core().RESTClient()).Events(namespace)})
+	eventBroadcaster.StartRecordingToSink(&v1core.EventSinkImpl{Interface: v1core.New(kubecli.CoreV1().RESTClient()).Events(namespace)})
 	return eventBroadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: name})
 }
 

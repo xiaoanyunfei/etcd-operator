@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: <ROLE_NAME>
+  name: etcd-operator
 rules:
 - apiGroups:
   - etcd.database.coreos.com
@@ -9,6 +9,9 @@ rules:
   - etcdclusters
   - etcdbackups
   - etcdrestores
+  - etcdclusters/status
+  - etcdbackups/status
+  - etcdrestores/status
   verbs:
   - "*"
 - apiGroups:
@@ -17,6 +20,14 @@ rules:
   - customresourcedefinitions
   verbs:
   - "*"
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - get
+  - update
 - apiGroups:
   - ""
   resources:

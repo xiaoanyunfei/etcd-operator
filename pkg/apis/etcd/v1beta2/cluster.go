@@ -18,13 +18,13 @@ import (
 	"errors"
 	"strings"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	defaultRepository  = "quay.io/coreos/etcd"
-	DefaultEtcdVersion = "3.2.13"
+	DefaultEtcdVersion = "3.5.9"
 )
 
 var (
@@ -32,7 +32,7 @@ var (
 	ErrBackupUnsetRestoreSet = errors.New("spec: backup policy must be set if restore policy is set")
 )
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // EtcdClusterList is a list of etcd clusters.
 type EtcdClusterList struct {
@@ -45,12 +45,15 @@ type EtcdClusterList struct {
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
 
+// EtcdCluster is the Schema for the etcdcluster API
 type EtcdCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              ClusterSpec   `json:"spec"`
-	Status            ClusterStatus `json:"status"`
+	Spec              ClusterSpec   `json:"spec,omitempty"`
+	Status            ClusterStatus `json:"status,omitempty"`
 }
 
 func (c *EtcdCluster) AsOwner() metav1.OwnerReference {
@@ -213,4 +216,8 @@ func (e *EtcdCluster) SetDefaults() {
 			},
 		}
 	}
+}
+
+func init() {
+	SchemeBuilder.Register(&EtcdCluster{}, &EtcdClusterList{})
 }

@@ -1,12 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: <ROLE_BINDING_NAME>
+  name: etcd-operator-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: <ROLE_NAME>
+  name: etcd-operator
 subjects:
 - kind: ServiceAccount
-  name: default
-  namespace: <NAMESPACE>
+  name: etcd-operator
+  namespace: default
